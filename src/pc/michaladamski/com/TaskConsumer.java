@@ -1,6 +1,7 @@
 package pc.michaladamski.com;
 
 import java.util.Deque;
+import java.util.Optional;
 
 public class TaskConsumer implements Runnable {
     private Deque<Task> queue;
@@ -13,13 +14,14 @@ public class TaskConsumer implements Runnable {
     public void run() {
         boolean interrupted = false;
         while (!interrupted) {
+            Optional<Task> task = Optional.empty();
             synchronized (queue) {
                 try {
                     if (queue.isEmpty()) {
                         queue.notifyAll();
                         queue.wait();
                     } else {
-                        System.out.println("Task execution result: " + queue.poll().execute());
+                        task = Optional.of(queue.poll());
                         if (queue.size() < Application.CAPACITY / 2) {
                             queue.notifyAll();
                         }
@@ -28,6 +30,7 @@ public class TaskConsumer implements Runnable {
                     interrupted = true;
                 }
             }
+            task.ifPresent(t -> System.out.println("Task execution result: " + t.execute()));
         }
     }
 }
