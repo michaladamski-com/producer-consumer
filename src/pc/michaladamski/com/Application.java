@@ -1,7 +1,5 @@
 package pc.michaladamski.com;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
