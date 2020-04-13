@@ -2,7 +2,6 @@ package pc.michaladamski.com;
 
 import java.util.Random;
 import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static pc.michaladamski.com.Application.CAPACITY;
 
