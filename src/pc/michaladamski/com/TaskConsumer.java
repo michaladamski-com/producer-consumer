@@ -1,12 +1,11 @@
 package pc.michaladamski.com;
 
-import java.util.Deque;
-import java.util.Optional;
+import java.util.concurrent.BlockingDeque;
 
 public class TaskConsumer implements Runnable {
-    private Deque<Task> queue;
+    private BlockingDeque<Task> queue;
 
-    public TaskConsumer(Deque<Task> queue) {
+    public TaskConsumer(BlockingDeque<Task> queue) {
         this.queue = queue;
     }
 
@@ -14,23 +13,14 @@ public class TaskConsumer implements Runnable {
     public void run() {
         boolean interrupted = false;
         while (!interrupted) {
-            Optional<Task> task = Optional.empty();
-            synchronized (queue) {
-                try {
-                    if (queue.isEmpty()) {
-                        queue.notifyAll();
-                        queue.wait();
-                    } else {
-                        task = Optional.of(queue.poll());
-                        if (queue.size() < Application.CAPACITY / 2) {
-                            queue.notifyAll();
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    interrupted = true;
-                }
+            Task task = null;
+            try {
+                task = queue.take();
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                interrupted = true;
             }
-            task.ifPresent(t -> System.out.println("Task execution result: " + t.execute()));
+            System.out.println("Task execution result: " + task.execute());
         }
     }
 }

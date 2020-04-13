@@ -1,14 +1,18 @@
 package pc.michaladamski.com;
 
-import java.util.Deque;
 import java.util.Random;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static pc.michaladamski.com.Application.CAPACITY;
 
 public class TaskProducer implements Runnable {
     private static final int BOUND = 1000;
-    private Deque<Task> queue;
+    private BlockingDeque<Task> queue;
     private Random random = new Random();
+    private volatile boolean produce = true;
 
-    public TaskProducer(Deque<Task> queue) {
+    public TaskProducer(BlockingDeque<Task> queue) {
         this.queue = queue;
     }
 
@@ -16,19 +20,19 @@ public class TaskProducer implements Runnable {
     public void run() {
         boolean interrupted = false;
         while (!interrupted) {
-            synchronized (queue) {
-                try {
-                    // add task to queue until it not reach capacity
-                    if (queue.size() < Application.CAPACITY) {
-                        Task task = new Task(random.nextInt(BOUND), random.nextInt(BOUND));
-                        queue.offer(task);
-                    } else {
-                        queue.notifyAll();
-                        queue.wait();
+            Task task = new Task(random.nextInt(BOUND), random.nextInt(BOUND));
+            try {
+                if (produce) {
+                    queue.put(task);
+                    if (queue.remainingCapacity() == 0) {
+                        produce = false;
                     }
-                } catch (InterruptedException e) {
-                    interrupted = true;
+                } else {
+                    Thread.sleep(100);
+                    produce = queue.remainingCapacity() >= CAPACITY / 2;
                 }
+            } catch (InterruptedException e) {
+                interrupted = true;
             }
         }
     }

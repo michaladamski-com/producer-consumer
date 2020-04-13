@@ -2,14 +2,16 @@ package pc.michaladamski.com;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 
 public class Application {
     public final static int CAPACITY = 20;
-    public final static int PROD_COUNT = 120;
+    public final static int PROD_COUNT = 2;
     public final static int CONS_COUNT = 4;
 
     public static void main(String[] args) {
-        Deque<Task> queue = new ArrayDeque<>(CAPACITY);
+        BlockingDeque<Task> queue = new LinkedBlockingDeque<>(CAPACITY);
         TaskProducer taskProducer = new TaskProducer(queue);
         TaskConsumer taskConsumer = new TaskConsumer(queue);
         runThreads(taskProducer, PROD_COUNT);
